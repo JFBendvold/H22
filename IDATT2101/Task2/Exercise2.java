@@ -4,7 +4,7 @@ package IDATT2101.Task2;
  * Exercise 2 program
  * @version 1.0
  * @author johnfb
- * @since 05.09.22
+ * @since 06.09.22
  */
 public class Exercise2 {
     public static double powMethod1(double x, int n) {
@@ -30,6 +30,10 @@ public class Exercise2 {
         return Math.pow(x, n);
     }
 
+    /**
+     * Method for testing if all pow-methods
+     * work as intended
+     */
     public static void testMethods() {
         System.out.println("Testing every method:");
         double x = 2;
@@ -77,8 +81,64 @@ public class Exercise2 {
         }
     }
 
+    /**
+     * Method for measuring each function runtime
+     * @param instances Number of test-instances
+     */
+    public static void testTime(int instances) {
+        double x = 54358;
+        int n = 4447;
+
+        System.out.println("n: " + instances);
+
+        double result1;
+        long startTime1;
+        long endTime1;
+        long totalTime1 = 0;
+        for (int i = 0; i < instances; i++) {
+            startTime1 = System.nanoTime();
+            result1 = powMethod1(x,n);
+            endTime1 = System.nanoTime();
+            totalTime1 += (endTime1 - startTime1);
+        }
+        totalTime1 /= instances;
+        System.out.println("PowMethod1: " + totalTime1 + "ns");
+
+        double result2;
+        long startTime2;
+        long endTime2;
+        long totalTime2 = 0;
+        for (int i = 0; i < instances; i++) {
+            startTime2 = System.nanoTime();
+            result2 = powMethod2(x,n);
+            endTime2 = System.nanoTime();
+            totalTime2 += (endTime2 - startTime2);
+        }
+        totalTime2 /= instances;
+        System.out.println("PowMethod2: " + totalTime2 + "ns");
+
+        double result3;
+        long startTime3;
+        long endTime3;
+        long totalTime3 = 0;
+        for (int i = 0; i < instances; i++) {
+            startTime3 = System.nanoTime();
+            result3 = powJava(x,n);
+            endTime3 = System.nanoTime();
+            totalTime3 += (endTime3 - startTime3);
+        }
+        totalTime3 /= instances;
+        System.out.println("PowMethod3: " + totalTime3 + "ns");
+    }
+
     public static void main(String[] args) {
         System.out.println("----- STARTING APPLICATION -----");
         testMethods();
+        System.out.println();
+        testTime(1000);
+        System.out.println();
+        testTime(10000);
+        System.out.println();
+        testTime(100000);
     }
 }
