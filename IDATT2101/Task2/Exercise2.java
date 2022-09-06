@@ -86,8 +86,8 @@ public class Exercise2 {
      * @param instances Number of test-instances
      */
     public static void testTime(int instances) {
-        double x = 54358;
-        int n = 4447;
+        double x = 1.001;
+        int n = 4999;
 
         System.out.println("n: " + instances);
 
@@ -135,6 +135,7 @@ public class Exercise2 {
         System.out.println("----- STARTING APPLICATION -----");
         testMethods();
         System.out.println();
+        System.out.println("----- RUNTIME-TESTS -----");
         testTime(1000);
         System.out.println();
         testTime(10000);
