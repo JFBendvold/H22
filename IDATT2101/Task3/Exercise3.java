@@ -5,33 +5,12 @@ import java.util.Date;
 import java.util.Random;
 
 public class Exercise3 {
-    public static int[] testArray = {24, 8, 42, 75, 29, 77, 38, 57};
-    public static int[] expectedArray = {8, 24, 29, 38, 42, 57, 75, 77};
-    public static int[] duplicateArray = {8, 24, 8, 24, 8, 24, 8, 24, 8, 24};
-    private static final String TIME_FORMAT = "%-8s%-20s%-15s%n";
-
-    public static class RunTimeTestClass {
-        public static void runTimeTest(int[] array) {
-            int n;
-            int[] array2 = array.clone();
-
-            System.out.println("n:" + array.length);
-            Date end;
-            System.out.println("Dual pivot Quicksort:");
-            Date start = new Date();
-            SortingClass.dualPivotQuickSort(array, 0, array.length - 1);
-            end = new Date();
-            double time = (double) (end.getTime() - start.getTime());
-            System.out.println(time + "ms runtime.");
-
-            System.out.println("Simple Quicksort:");
-            start = new Date();
-            SortingClass.quicksort(array2, 0, array2.length-1);
-            end = new Date();
-            time = (double) (end.getTime() - start.getTime());
-            System.out.println(time + "ms runtime.");
-        }
-    }
+    public static int[] testArray1 = {24, 8, 8, 8, 7, 4, 99, 1000000, 1000000, 42, 75, 29, 77, 38, 57};
+    public static int[] testArray2 = {24, 8, 8, 8, 7, 4, 99, 1000000, 1000000, 42, 75, 29, 77, 38, 57};
+    public static int[] optimalAlternatingArray = {5, 5, 5, 5, 5, 10, 10, 10, 10, 10};
+    public static int[] expectedArray = {4, 7, 8, 8, 8, 24, 29, 38, 42, 57, 75, 77, 99, 1000000, 1000000};
+    private static final String TIME_FORMAT = "%-20s %-15s %-10s %-10s %n";
+    private static final String TABLE_LINE = "-------------------------------------------------------------";
 
     /**
      * Generates a random array of integers
@@ -78,18 +57,6 @@ public class Exercise3 {
         return array;
     }
 
-    /**
-     *
-     */
-    public static void testSorting() {
-        SortingClass.dualPivotQuickSort(testArray, 0, 7);
-        if (Arrays.equals(testArray, expectedArray)) {
-            System.out.println("Test succeeded");
-        } else {
-            System.out.println("Test failed");
-        }
-    }
-
     public static class SortingClass {
         public static void quicksort(int[] t, int v, int h) {
             if (h - v > 2) {
@@ -104,9 +71,9 @@ public class Exercise3 {
             int m = median3sort(t, v, h);
             int dv = t[m];
             swap(t, m, h - 1);
-            for (iv = v, ih = h - 1; ; ) {
-                while (t[++iv] < dv) ;
-                while (t[--ih] > dv) ;
+            for (iv = v, ih = h - 1;;) {
+                while (t[++iv] < dv);
+                while (t[--ih] > dv);
                 if (iv >= ih) break;
                 swap(t, iv, ih);
             }
@@ -194,42 +161,162 @@ public class Exercise3 {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println("----- STARTING APPLICATION -----");
-        testSorting();
+    public static class RunTimeTestClass {
+        // Global variable used for tracking change
+        public static double time;
+        public static double oldTime;
 
-        System.out.println("\nTesting random arrays:");
+        public static void runTimeTestQuickSort(int[] array) {
+            int[] array2 = array.clone();
+            Date end;
+            Date start = new Date();
+            SortingClass.dualPivotQuickSort(array2, 0, array2.length - 1);
+            end = new Date();
+            time = (double) (end.getTime() - start.getTime());
+
+            if (oldTime == 0){
+                System.out.printf(TIME_FORMAT, "QuickSort", array2.length, time + "ms", "");
+            } else if (oldTime > 0){
+                System.out.printf(TIME_FORMAT, "QuickSort", array2.length, time + "ms",
+                        String.format("%5.2f %-5s", (int) 100*(time/oldTime-1), "%"));;
+            }
+            oldTime = time;
+        }
+
+        public static void runTimeTestDualPivot(int[] array) {
+            int[] array2 = array.clone();
+            Date end;
+            Date start = new Date();
+            SortingClass.quicksort(array2, 0, array2.length-1);
+            end = new Date();
+            time = (double) (end.getTime() - start.getTime());
+            if (oldTime == 0){
+                System.out.printf(TIME_FORMAT, "Dual Pivot sort", array2.length, time + "ms", "");
+            } else if (oldTime > 0){
+                System.out.format(TIME_FORMAT, "Dual Pivot sort", array2.length, time + "ms",
+                        String.format("%5.2f %-5s", 100*(time/oldTime-1), "%"));
+            }
+            oldTime = time;
+        }
+    }
+
+    public static class SortingTester {
+        public static boolean testSortedArray() {
+            int[] originalArray = createSortedArray(1000);
+            int[] sortedArray1 = createSortedArray(1000);
+            int[] sortedArray2 = createSortedArray(1000);
+            SortingClass.dualPivotQuickSort(sortedArray1, 0, sortedArray1.length-1);
+            SortingClass.quicksort(sortedArray1, 0, sortedArray1.length-1);
+            if (Arrays.equals(originalArray, sortedArray2) && Arrays.equals(originalArray, sortedArray2)) {
+                System.out.println("Test succeeded");
+                return true;
+            }
+
+            System.out.println("Test failed");
+            return false;
+        }
+
+        public static boolean testAlternatingArray() {
+            int[] alternatingArray1 = createAlternatingArray(10, 5, 10);
+            int[] alternatingArray2 = createAlternatingArray(10, 5, 10);
+            SortingClass.dualPivotQuickSort(alternatingArray1, 0, alternatingArray1.length-1);
+            SortingClass.quicksort(alternatingArray2,0, alternatingArray2.length -1);
+            if (Arrays.equals(alternatingArray1, optimalAlternatingArray) &&
+                    Arrays.equals(alternatingArray2, optimalAlternatingArray)) {
+                System.out.println("Test succeeded");
+                return true;
+            }
+
+            System.out.println("Test failed");
+            return false;
+        }
+
+        public static boolean testRandomArray() {
+            SortingClass.dualPivotQuickSort(testArray1, 0, testArray1.length-1);
+            SortingClass.quicksort(testArray2, 0, testArray1.length-1);
+            if (Arrays.equals(testArray1, expectedArray) && Arrays.equals(testArray2, expectedArray)) {
+                System.out.println("Test succeeded");
+                return true;
+            }
+            System.out.println("Test failed");
+            return false;
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println("----- STARTING APPLICATION -----\n");
+
+        System.out.println("Running Tests:");
+        SortingTester.testRandomArray();
+        SortingTester.testAlternatingArray();
+        SortingTester.testSortedArray();
+
+        System.out.println("\n\nTask 1 - sorting arrays with random data");
+        System.out.format(TIME_FORMAT, "Type", "Array Size", "Time", "Change");
+        System.out.println(TABLE_LINE);
 
         int[] randomArray = createRandomArray(1000000);
-        RunTimeTestClass.runTimeTest(randomArray);
+        RunTimeTestClass.runTimeTestQuickSort(randomArray);
+        RunTimeTestClass.runTimeTestDualPivot(randomArray);
+        RunTimeTestClass.oldTime = 0;
         System.out.println();
+
         randomArray = createRandomArray(10000000);
-        RunTimeTestClass.runTimeTest(randomArray);
+        RunTimeTestClass.runTimeTestQuickSort(randomArray);
+        RunTimeTestClass.runTimeTestDualPivot(randomArray);
+        RunTimeTestClass.oldTime = 0;
         System.out.println();
+
         randomArray = createRandomArray(100000000);
-        RunTimeTestClass.runTimeTest(randomArray);
+        RunTimeTestClass.runTimeTestQuickSort(randomArray);
+        RunTimeTestClass.runTimeTestDualPivot(randomArray);
+        RunTimeTestClass.oldTime = 0;
+        System.out.println("\n\n");
 
-        System.out.println("\nTesting semi-sorted arrays:");
+        System.out.println(TABLE_LINE);
+        System.out.println("Task 2 - sorting arrays with duplicates");
+        System.out.format(TIME_FORMAT, "Type", "Array Size", "Time", "Change");
+        System.out.println(TABLE_LINE);
+
         int[] alternatingArray = createAlternatingArray(1000000, 4, 8);
-        RunTimeTestClass.runTimeTest(alternatingArray);
+        RunTimeTestClass.runTimeTestQuickSort(alternatingArray);
+        RunTimeTestClass.runTimeTestDualPivot(alternatingArray);
+        RunTimeTestClass.oldTime = 0;
         System.out.println();
-        alternatingArray = createAlternatingArray(10000000, 4, 8);
-        RunTimeTestClass.runTimeTest(alternatingArray);
-        System.out.println();
-        alternatingArray = createAlternatingArray(100000000, 4, 8);
-        RunTimeTestClass.runTimeTest(alternatingArray);
 
-        System.out.println("\nTesting sorted arrays:");
+        alternatingArray = createAlternatingArray(10000000, 4, 8);
+        RunTimeTestClass.runTimeTestQuickSort(alternatingArray);
+        RunTimeTestClass.runTimeTestDualPivot(alternatingArray);
+        RunTimeTestClass.oldTime = 0;
+        System.out.println();
+
+        alternatingArray = createAlternatingArray(100000000, 4, 8);
+        RunTimeTestClass.runTimeTestQuickSort(alternatingArray);
+        RunTimeTestClass.runTimeTestDualPivot(alternatingArray);
+        RunTimeTestClass.oldTime = 0;
+        System.out.println("\n\n");
+
+        System.out.println(TABLE_LINE);
+        System.out.println("Task 3 - sorting sorted arrays");
+        System.out.format(TIME_FORMAT, "Type", "Array Size", "Time", "Change");
+        System.out.println(TABLE_LINE);
 
         int[] sortedArray = createSortedArray(1000000);
-        RunTimeTestClass.runTimeTest(sortedArray);
+        RunTimeTestClass.runTimeTestQuickSort(sortedArray);
+        RunTimeTestClass.runTimeTestDualPivot(sortedArray);
+        RunTimeTestClass.oldTime = 0;
         System.out.println();
+
         sortedArray = createSortedArray(10000000);
-        RunTimeTestClass.runTimeTest(sortedArray);
+        RunTimeTestClass.runTimeTestQuickSort(sortedArray);
+        RunTimeTestClass.runTimeTestDualPivot(sortedArray);
+        RunTimeTestClass.oldTime = 0;
         System.out.println();
+
         sortedArray = createSortedArray(100000000);
-        RunTimeTestClass.runTimeTest(sortedArray);
-        System.out.println();
+        RunTimeTestClass.runTimeTestQuickSort(sortedArray);
+        RunTimeTestClass.runTimeTestDualPivot(sortedArray);
+        RunTimeTestClass.oldTime = 0;
+        System.out.println("\n\n");
     }
 }
-
