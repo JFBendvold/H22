@@ -4,6 +4,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Random;
 
+/**
+ * Exercise 3 program
+ * @version 1.0
+ * @author johnfb, chribrev, bjornjob, teodorbi
+ * @since 13.09.22
+ */
 public class Exercise3 {
     public static int[] testArray1 = {24, 8, 8, 8, 7, 4, 99, 1000000, 1000000, 42, 75, 29, 77, 38, 57};
     public static int[] testArray2 = {24, 8, 8, 8, 7, 4, 99, 1000000, 1000000, 42, 75, 29, 77, 38, 57};
@@ -11,6 +17,7 @@ public class Exercise3 {
     public static int[] expectedArray = {4, 7, 8, 8, 8, 24, 29, 38, 42, 57, 75, 77, 99, 1000000, 1000000};
     private static final String TIME_FORMAT = "%-20s %-15s %-10s %-10s %n";
     private static final String TABLE_LINE = "-------------------------------------------------------------";
+
 
     /**
      * Generates a random array of integers
@@ -38,6 +45,12 @@ public class Exercise3 {
             array[i] = i;
         }
         return array;
+    }
+
+    public static int checksum(int[] array) {
+        int sum = 0;
+        for (int i : array) sum += i;
+        return sum;
     }
 
     /**
@@ -170,7 +183,7 @@ public class Exercise3 {
             int[] array2 = array.clone();
             Date end;
             Date start = new Date();
-            SortingClass.dualPivotQuickSort(array2, 0, array2.length - 1);
+            SortingClass.quicksort(array2, 0, array2.length-1);
             end = new Date();
             time = (double) (end.getTime() - start.getTime());
 
@@ -187,7 +200,7 @@ public class Exercise3 {
             int[] array2 = array.clone();
             Date end;
             Date start = new Date();
-            SortingClass.quicksort(array2, 0, array2.length-1);
+            SortingClass.dualPivotQuickSort(array2, 0, array2.length - 1);
             end = new Date();
             time = (double) (end.getTime() - start.getTime());
             if (oldTime == 0){
@@ -241,6 +254,34 @@ public class Exercise3 {
             System.out.println("Test failed");
             return false;
         }
+
+        public static boolean testIfSumIsEqual() {
+            int[] testArray = createRandomArray(10000000);
+            int sumBeforeSort = checksum(testArray);
+            SortingClass.quicksort(testArray, 0, testArray.length-1);
+            int sumAfterSort = checksum(testArray);
+            if (sumAfterSort != sumBeforeSort){
+                return false;
+            }
+
+            int[] testArray2 = createRandomArray(10000000);
+            sumBeforeSort = checksum(testArray2);
+            SortingClass.dualPivotQuickSort(testArray2, 0, testArray2.length-1);
+            sumAfterSort = checksum(testArray2);
+            return sumBeforeSort == sumAfterSort;
+        }
+
+        public static boolean checkOrder(){
+            int[] testArray = createRandomArray(100000);
+            SortingClass.quicksort(testArray, 0, testArray.length-1);
+            for (int i = 0; i < testArray.length -2; i++){
+                if (!(testArray[i+1] >= testArray[i])){
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 
     public static void main(String[] args) {
@@ -250,6 +291,8 @@ public class Exercise3 {
         SortingTester.testRandomArray();
         SortingTester.testAlternatingArray();
         SortingTester.testSortedArray();
+        System.out.println(SortingTester.testIfSumIsEqual());
+        System.out.println(SortingTester.checkOrder());
 
         System.out.println("\n\nTask 1 - sorting arrays with random data");
         System.out.format(TIME_FORMAT, "Type", "Array Size", "Time", "Change");
