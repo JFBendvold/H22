@@ -191,7 +191,7 @@ public class Exercise4_2 {
      * @param args args
      */
     public static void main(String[] args) {
-        System.out.println("----- EXERCISE 2 PART 2 -----\n");
+        System.out.println("----- EXERCISE 4 PART 2 -----\n");
         Scanner sc = new Scanner(System.in);
         String input;
         Tree tree = new Tree();
