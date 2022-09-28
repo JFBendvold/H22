@@ -1,0 +1,38 @@
+"C:\Program Files\Java\jdk-11.0.12\bin\java.exe" "-javaagent:C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2021.2.2\lib\idea_rt.jar=57374:C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2021.2.2\bin" -Dfile.encoding=UTF-8 -classpath "C:\Users\jfben\OneDrive - NTNU\Documents\Project Lucy\H22\out\production\H22" IDATT2101.Task5.Part1.Exercise5_1
+Leon Egeberg Hesthaug -> Eirik Elvestad
+Ann-Marie Aeronuwy Francoise Revillard -> Tomas Beranek
+Tord Valestrand -> Anna Marie Bøe Tvedt
+Adrian Gunnar Lauterer -> Jarand Jensen Romestrand
+Kristoffer Svedal -> Katarzyna Szlejter
+Nils William Ormestad Lie -> Jakob Karevold Grønhaug
+Callum Gran -> Nils William Ormestad Lie
+Kristian Vaula Jensen -> Sondre Malerud
+Sebastian Wessel -> Ådne Tøftum Svendsrud
+Eilert Werner Hansen -> Camilla Kristiansen Birkelund
+Daniel Skymoen -> Emil Orvik Olsson
+Jon Martinus Rødtang -> Ivan Shirshikov
+Long Thanh Thai -> Theodor Alexander Holme
+Peder Arentz Nygaard -> Carl Johan Gützkow
+Anders Montsko Austlid -> Kristoffer Svedal
+Edvard Sørby -> Tord Valestrand
+Teodor Birkeland -> Peder Arentz Nygaard
+Martin Nordli Almenningen -> Jonatan André Vevang
+Charlotte Hallan Christiansen -> Edvard Sørby
+Vebjørn Andreas Lind-Solstad Myklebust -> Hadar Hayat
+Simen Johan Grønnslett -> Aleksander Olsvik
+Navid Muradi -> Malin Michelle Riisem Edvardsen
+Andreas Finni Magnussen -> Martin Nordli Almenningen
+Morgan Torgersen -> Arunan Gnanasekaran
+Mona Mahmoud Mousa -> Daniel Skymoen
+Håkon Hansen Bergrem -> Navid Muradi
+Ingrid Flatland -> Beka Daniel Bonsa
+Steinar Nilsskog -> Håkon Henriksen Juell
+Torstein Øvstedal -> Jostein Lind Aanby
+
+Collisions: 29, load factor: 0.5666666666666667, average collisions per person: 0.3411764705882353
+John Fredrik Bendvold
+Teodor Birkeland
+Christoffer Brevik
+Bjørn-Johnny Bendixen
+
+Process finished with exit code 0
