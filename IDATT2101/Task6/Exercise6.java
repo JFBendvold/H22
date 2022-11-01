@@ -23,15 +23,6 @@ public class Exercise6 {
 
         //public int numOfSCC;
 
-        public void addEdge(int from, int to){
-            nodes.add(new int[] {from, to});
-        }
-
-        public void dfs_init() {
-            for (int i = N; i-- > 0;) {
-                nodes.get(i).d;
-            }
-        }
 
     }
 
@@ -68,7 +59,7 @@ public class Exercise6 {
             fileReader = new BufferedReader(new FileReader(file));
 
             // Transform the file into a graph
-            String line = fileReader.readLine())
+            String line = fileReader.readLine();
             String shortenedLine = line.replaceAll("\\s+", " ");        // Reduce multiple spaces to max 1
             String[] lineValues = line.split(" ");                      // Divide values into a list
             Graph graph = new Graph(lineValues[0], lineValues[1]);
@@ -76,7 +67,7 @@ public class Exercise6 {
             while ((line = fileReader.readLine()) != null) {
                 shortenedLine = line.replaceAll("\\s+", " ");        // Reduce multiple spaces to max 1
                 lineValues = line.split(" ");                      // Divide values into a list
-                graph.addEdge(Integer.parseInt(lineValues[0]), Integer.parseInt(lineValues[1]);
+                //graph.addEdge(Integer.parseInt(lineValues[0]), Integer.parseInt(lineValues[1]);
             }
         }
 
