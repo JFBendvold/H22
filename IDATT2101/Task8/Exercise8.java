@@ -12,6 +12,4 @@ public class Exercise8 {
         System.out.println("----- STARTING APPLICATION -----\n");
     }
 
-    // Moren til Fred er så feit
-    // Selv ikke Huffman-LZ-algoritmen vår klarer å komprimere bilder av henne
 }

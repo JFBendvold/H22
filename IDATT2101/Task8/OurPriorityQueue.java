@@ -2,16 +2,16 @@ package IDATT2101.Task8;
 
 import java.util.PriorityQueue;
 
-public class Heap {
+public class OurPriorityQueue {
     int length;
     PriorityQueue<HuffmanNode> queue;
 
-    public Heap(int length) {
+    public OurPriorityQueue(int length) {
         this.length = length;
         this.queue = new PriorityQueue<>(new HuffmanNode());
     }
 
-    public Heap buildTree(int[] values) {
+    public OurPriorityQueue buildTree(int[] values) {
         for (int i = 0; i < values.length; i++) {
             if (values[i] == 0) continue;
 
@@ -23,6 +23,7 @@ public class Heap {
         return this;
     }
 
+    /*
     int above(int i) {
         return (i - 1) >> 1;
     }
@@ -34,16 +35,21 @@ public class Heap {
     int right(int i) {
         return (i +1) << 1;
     }
+    */
 
     public boolean sizeIsOne() {
         return queue.size() == 1;
     }
 
-    public HuffmanNode getMin() {
+    public boolean sizeMoreThanOne() {
+        return queue.size() > 1;
+    }
+
+    public HuffmanNode getLowest() {
         return queue.poll();
     }
 
-    public void insert(HuffmanNode top) {
+    public void addValue(HuffmanNode top) {
         queue.add(top);
     }
 }

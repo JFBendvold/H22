@@ -12,11 +12,11 @@ public class HuffmanNode implements Comparator<HuffmanNode> {
 
     public HuffmanNode(int charFreq, char c) {
         this.charFreq = charFreq;
-        this.c = c;
+        this.char = c;
         this.left = null;
         this.right = null;
     }
-
+    /*
     public HuffmanNode createHuffmanTree(PriorityQueue<HuffmanNode> pq) {
         HuffmanNode tree = new HuffmanNode();
         if (pq.size() > 1) {
@@ -36,6 +36,7 @@ public class HuffmanNode implements Comparator<HuffmanNode> {
     public int getSum(HuffmanNode t, HuffmanNode n) {
         return t.charFreq + n.charFreq;
     }
+    */
 
     @Override
     public int compare(HuffmanNode h1, HuffmanNode h2) {
