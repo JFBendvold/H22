@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class LZ77 {
     private final int BUFFERSIZE = (1 << 11) - 1;
     private final int POINTERSIZE = (1 << 4) - 1;
-    private final int MIN_SIZE_POINTER = 3;
+    private final int MIN_POINTER_SIZE = 3;
     private char[] data;
 
     private DataInputStream inputStream;
@@ -44,8 +44,8 @@ public class LZ77 {
                     incompressible = new StringBuilder();
                 }
 
-                compressedBytes.add((byte) ((pointer.getDistance() >> 4) | (1 << 7)));
-                compressedBytes.add((byte) (((pointer.getDistance() & 0x0F) << 4) | (pointer.getLength() - 1)));
+                compressedBytes.add((byte) ((pointer.getDist() >> 4) | (1 << 7)));
+                compressedBytes.add((byte) (((pointer.getDist() & 0x0F) << 4) | (pointer.getLength() - 1)));
                 i += pointer.getLength();
             }
             else {                  //If no pointer was found
@@ -72,6 +72,41 @@ public class LZ77 {
         return toByteArray(compressedBytes);
     }
 
+    public void decompress(byte[] bytes, String outPath) throws IOException {
+        outputStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(outPath)));
+
+        ArrayList<Byte> b = new ArrayList<>();
+        int currentIndex = 0;
+
+        int i = 0;
+        while (i < bytes.length-1) {
+            byte condition = bytes[i];
+            if (condition >= 0) { //Number of uncompressed bytes
+                System.out.println(condition);
+                for (int j = 0; j < condition; j++) {
+                    b.add(bytes[i+j+1]);
+                }
+                currentIndex += condition;
+                i += condition + 1;
+            }
+            else { //Read a pointer
+                int jump = ((condition & 127) << 4) | ((bytes[i+1] >> 4) & 15);
+                int length = (bytes[i+1] & 0x0F) + 1; //Length of pointer
+
+                for (int j = 0; j < length; j++) {
+                    b.add(b.get(currentIndex - jump + j));
+                }
+                currentIndex += length;
+                i += 2; //Pointer (2 bytes)
+            }
+        }
+        for (i = 0; i < currentIndex; i++) {
+            outputStream.write(b.get(i));
+        }
+        outputStream.flush();
+        outputStream.close();
+    }
+
     /**
      * Method for converting a list to a byte-array
      * @param list List to convert to a byte-array
@@ -85,6 +120,11 @@ public class LZ77 {
         return byteArray;
     }
 
+    /**
+     * Method for finding the pointer for the position of the current index in the array
+     * @param currIndex is the current index
+     * @return the pointer
+     */
     private Pointer getPointer(int currIndex){
         Pointer pointer = new Pointer();
         int maxIndex = currIndex + POINTERSIZE;
@@ -95,9 +135,9 @@ public class LZ77 {
 
         char[] buffer = Arrays.copyOfRange(data, minIndex, currIndex);
 
-        int i = currIndex + MIN_SIZE_POINTER -1;
+        int i = currIndex + MIN_POINTER_SIZE -1;
 
-        outerWhile:
+        outerLoop:
         while(i <= maxIndex){
             char[] keyWord = Arrays.copyOfRange(data, currIndex, i +1);
             int j = 0;
@@ -107,10 +147,10 @@ public class LZ77 {
                     k--;
                 }
                 if (k < 0){
-                    pointer.setDistance(buffer.length-j);
+                    pointer.setDist(buffer.length-j);
                     pointer.setLength(keyWord.length);
                     i++;
-                    continue outerWhile;
+                    continue outerLoop;
                 }
                 else {
                     int l = k-1;
@@ -122,45 +162,52 @@ public class LZ77 {
             }
             break;
         }
-        if (pointer.getLength() > 0 && pointer.getLength() > 0){
+        if (pointer.getLength() > 0){
             return pointer;
         }
         return null;
     }
 
 
-
+    /**
+     * Class representing a pointer to a position in the array
+     */
     private class Pointer{
-        private int length;
-        private int distance;
+        private int length; //The length of the text we want to compress
+        private int dist; //The distance from the current position
 
         /**
-         * Constructor
+         * Constructor setting the initial pointer with values as -1
          */
         public Pointer(){
             this(-1,-1);
         }
 
-        public Pointer(int matchLength, int matDistance){
+        /**
+         * Constructor, setting the length and distance
+         * @param length is the length of the text
+         * @param distance distance from the current position
+         */
+        public Pointer(int length, int distance){
             super();
-            this.length = matchLength;
-            this.distance = matDistance;
+            this.length = length;
+            this.dist = distance;
         }
 
         public int getLength(){
             return length;
         }
 
-        public int getDistance(){
-            return distance;
+        public int getDist(){
+            return dist;
         }
 
-        public void setLength(int matchLength){
-            this.length = matchLength;
+        public void setLength(int length){
+            this.length = length;
         }
 
-        public void setDistance(int matDistance){
-            this.distance = matDistance;
+        public void setDist(int distance){
+            this.dist = distance;
         }
 
     }

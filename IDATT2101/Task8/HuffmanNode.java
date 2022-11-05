@@ -12,12 +12,12 @@ public class HuffmanNode implements Comparator<HuffmanNode> {
 
     public HuffmanNode(int charFreq, char c) {
         this.charFreq = charFreq;
-        this.char = c;
+        this.c = c;
         this.left = null;
         this.right = null;
     }
-    /*
-    public HuffmanNode createHuffmanTree(PriorityQueue<HuffmanNode> pq) {
+    
+    public static HuffmanNode createHuffmanTree(PriorityQueue<HuffmanNode> pq) {
         HuffmanNode tree = new HuffmanNode();
         if (pq.size() > 1) {
             HuffmanNode left = pq.poll();
@@ -32,11 +32,10 @@ public class HuffmanNode implements Comparator<HuffmanNode> {
         }
         return tree;
     }
-
-    public int getSum(HuffmanNode t, HuffmanNode n) {
+    
+    public static int getSum(HuffmanNode t, HuffmanNode n) {
         return t.charFreq + n.charFreq;
     }
-    */
 
     @Override
     public int compare(HuffmanNode h1, HuffmanNode h2) {

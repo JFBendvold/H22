@@ -15,6 +15,7 @@ public class Compressor {
         byte[] compressedFile = lz.compress(inPath);
 
         Huffman huffman = new Huffman();
-        huffman.compress(compressedFile, outPath);
+        int i = huffman.compress(compressedFile, outPath);
+        System.out.println(i);
     }
 }
