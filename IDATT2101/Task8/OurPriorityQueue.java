@@ -17,7 +17,7 @@ public class OurPriorityQueue {
 
             char currentChar = (char) i;
             int frequency = values[i];
-            HuffmanNode hn = new HuffmanNode(frequency, currentChar);
+            HuffmanNode hn = new HuffmanNode(currentChar, frequency);
             queue.add(hn);
         }
         return this;

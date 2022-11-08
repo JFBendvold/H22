@@ -17,6 +17,9 @@ public class LZ77 {
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
 
+    /**
+     * Empty constructor
+     */
     public LZ77() {}
 
     public byte[] compress(String path) throws IOException {
@@ -33,7 +36,7 @@ public class LZ77 {
         //Stores all variables that can't be compressed
         StringBuilder incompressible = new StringBuilder();
 
-        for (int i = 0; i < data.length; i++) {
+        for (int i = 0; i < data.length;) {
             Pointer pointer = getPointer(i);
             if (pointer != null) {  //If a pointer was found
                 if (incompressible.length() != 0) {
@@ -139,11 +142,11 @@ public class LZ77 {
 
         outerLoop:
         while(i <= maxIndex){
-            char[] keyWord = Arrays.copyOfRange(data, currIndex, i +1);
+            char[] keyWord = Arrays.copyOfRange(data, currIndex, i + 1);
             int j = 0;
             while (keyWord.length + j <= buffer.length){
-                int k = keyWord.length -1;
-                while (k <= 0 && keyWord[k] == buffer[j+k]){
+                int k = keyWord.length - 1;
+                while (k >= 0 && keyWord[k] == buffer[j+k]){
                     k--;
                 }
                 if (k < 0){
@@ -157,12 +160,12 @@ public class LZ77 {
                     while (l >= 0 && keyWord[l] != buffer[j+k]){
                         l--;
                     }
-                    j += k-l;
+                    j += k - l;
                 }
             }
             break;
         }
-        if (pointer.getLength() > 0){
+        if (pointer.getLength() > 0 && pointer.getLength() > 0){
             return pointer;
         }
         return null;

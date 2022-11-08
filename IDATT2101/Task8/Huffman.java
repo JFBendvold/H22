@@ -1,105 +1,93 @@
-  package IDATT2101.Task8;
+package IDATT2101.Task8;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.PriorityQueue;
 
 public class Huffman {
-    private static final int BYTE_MAX_VALUE = 256;
+    private static final int MAX_BYTE_VALUE = 256;
 
+    // frequencies[i] = frequency of char i
     private List<Byte> bytes;
+
     private int[] frequencies;
-    private String[] bitStrings;
-    DataOutputStream outData;
+    private String[] bitstrings;
+    DataOutputStream out;
 
     public Huffman() {
-        this.frequencies = new int[BYTE_MAX_VALUE];
-        this.bitStrings = new String[BYTE_MAX_VALUE];
+        this.frequencies = new int[MAX_BYTE_VALUE];
+        this.bitstrings = new String[MAX_BYTE_VALUE];
         bytes = new ArrayList<>();
     }
 
-    //[00110101, 10100101, 00101101] = F R E
-    public int compress(byte[] compressedBytes, String outPath) throws IOException {
-        for (int i = 0; i < compressedBytes.length; ++i) {
+    public int compress(byte[] compressedBytes,  String outpath) throws IOException {
+        for (int i = 0; i < compressedBytes.length; ++i){
             int b = compressedBytes[i];
-            if (compressedBytes[i] < 0) {
-                frequencies[BYTE_MAX_VALUE + b]++;
-            } else {
-                frequencies[b]++;
-            }
+            if (compressedBytes[i] < 0)
+                frequencies[MAX_BYTE_VALUE + b]++;
+            else frequencies[b]++;
         }
         HuffmanNode root = buildHuffmanTree();
-        defineValues(root, "");
-        writeToFile(outPath, compressedBytes);
-        return outData.size();
+        parseCodes(root, "");
+        writeToOutputFile(outpath, compressedBytes);
+
+        return out.size();
     }
 
-    public HuffmanNode buildHuffmanTree() {
-        OurPriorityQueue queue = new OurPriorityQueue(frequencies.length);
-        queue.buildTree(frequencies);
+    private HuffmanNode buildHuffmanTree() {
+        OurPriorityQueue heap = new OurPriorityQueue(frequencies.length);
+        heap.buildTree(frequencies);
 
-        HuffmanNode tree = new HuffmanNode();
-        while (queue.sizeMoreThanOne()) {
-            // Get the two lowest nodes of the queue
-            HuffmanNode left = queue.getLowest();
-            HuffmanNode right = queue.getLowest();
+        HuffmanNode root = new HuffmanNode();
 
-            // Create a node over the values, with a combined frequency value
-            HuffmanNode top = new HuffmanNode(freqSum(left, right), '\0'); //\0 = null
+        while (!heap.sizeIsOne()) {
+            HuffmanNode left = heap.getLowest();
+            HuffmanNode right = heap.getLowest();
 
-            // Add the nodes to the combined node
+            int topFrequency = left.charFrequency + right.charFrequency;
+            HuffmanNode top = new HuffmanNode('\0', topFrequency);
+
             top.left = left;
             top.right = right;
 
-            // Put the top node back in the queue
-            queue.addValue(top);
-
-            // Update tree
-            tree = top;
+            heap.addValue(top);
+            root = top;
         }
-        return tree;
+
+        return root;
     }
 
-    public int freqSum(HuffmanNode node1, HuffmanNode node2){
-        return node1.charFreq + node2.charFreq;
-    }
-
-    private void defineValues(HuffmanNode top, String s) {
-        // If a Node is at the bottom of a tree, this node represents a letter
-        if (top.left == null && top.right == null) {
-            // Gives letter a value in the compressed tree
-            bitStrings[top.c] = s;
+    private void parseCodes(HuffmanNode root, String s) {
+        if (root.left == null && root.right == null) {
+            bitstrings[root.character] = s;
             return;
         }
-        // If node has nodes under it, it is not a letter
-        // Repeats method recursively to nodes further down
-        defineValues(top.left, s + "0");
-        defineValues(top.right, s + "1");
+
+        parseCodes(root.left, s + "0");
+        parseCodes(root.right, s + "1");
     }
 
-    private void writeToFile(String outpath, byte[] compressedBytes) throws IOException {
-        // Create DataOutputStream
-        outData = new DataOutputStream(new FileOutputStream(outpath));
+    private void writeToOutputFile(String outpath, byte[] compressedBytes) throws IOException {
+        out = new DataOutputStream(new FileOutputStream(outpath));
 
-        // Write down compressed message to file
         for (int i : frequencies)
-            outData.writeInt(i);
+            out.writeInt(i);
 
-        // Write out last byte
         int lastByte = parseBitStringsAndGetLastByte(compressedBytes);
-        outData.writeInt(lastByte);
+        out.writeInt(lastByte);
 
+        writeBytes();
 
-        // s
-        for (Byte s : bytes) {
-            outData.write(s);
-        }
-
-        outData.close();
+        out.close();
     }
 
-    // The Great wall of Uncertainty
+    private void writeBytes() throws IOException {
+        for (Byte s : bytes) {
+            out.write(s);
+        }
+    }
 
     private int parseBitStringsAndGetLastByte(byte[] compressedBytes ) throws IOException {
         int input;
@@ -110,23 +98,20 @@ public class Huffman {
 
         for (k = 0; k < compressedBytes.length; k++) {
             input = compressedBytes[k];
-            // Can't have a negative value
-            if (input < 0) {
-                input += BYTE_MAX_VALUE;
-            }
+            if (input < 0)
+                input += MAX_BYTE_VALUE;
 
-            String bitString = bitStrings[input];
+            String bitString = bitstrings[input];
 
             j = 0;
             while (j < bitString.length()) {
-                // Position says 0
                 if (bitString.charAt(j) == '0')
                     currentByte = (currentByte << 1);
-                // Position says 1
                 else
                     currentByte = ((currentByte << 1) | 1); // times 2 + 1
-                j++;
-                i++;
+
+                ++j;
+                ++i;
 
                 if (i == 8) {
                     bytes.add((byte) currentByte);
@@ -150,7 +135,7 @@ public class Huffman {
         ArrayList<HuffmanNode> nodeList = new ArrayList<>();
         for (int i = 0; i < frequensies.length; i++) {
             if (frequensies[i] != 0) {
-                nodeList.add(new HuffmanNode(i, (char) frequensies[i]));
+                nodeList.add(new HuffmanNode((char) i, frequensies[i]));
             }
         }
         return nodeList;
@@ -163,12 +148,12 @@ public class Huffman {
             int freq = in.readInt();
             frequencies[i] = freq;
         }
-        ArrayList<Byte> outData = new ArrayList<>();
+        ArrayList<Byte> out = new ArrayList<>();
 
         int lastByte = in.readInt();
-        PriorityQueue<HuffmanNode> pq = new PriorityQueue<>(256, (a, b) -> a.charFreq - b.charFreq);
+        PriorityQueue<HuffmanNode> pq = new PriorityQueue<>(256, (a, b) -> a.charFrequency - b.charFrequency);
         pq.addAll(makeNodeList(frequencies));
-        HuffmanNode tree = buildHuffmanTree();
+        HuffmanNode tree = HuffmanNode.makeHuffmanTree(pq);
         byte ch;
         byte[] bytes = in.readAllBytes();
         in.close();
@@ -179,16 +164,16 @@ public class Huffman {
             ch = bytes[i];
             Bitstring b = new Bitstring(8, ch);
             h = Bitstring.concat(h, b);
-            h = writeChar(tree, h, outData);
+            h = writeChar(tree, h, out);
         }
         if (lastByte > 0) {
             Bitstring b = new Bitstring(lastByte, bytes[length] >> (8 - lastByte));
             h = Bitstring.concat(h, b);
-            writeChar(tree, h, outData);
+            writeChar(tree, h, out);
         }
         in.close();
 
-        return toByteArray(outData);
+        return toByteArray(out);
     }
 
     public byte[] toByteArray(ArrayList<Byte> list) throws IOException {
@@ -200,22 +185,22 @@ public class Huffman {
     }
 
     private static Bitstring writeChar(HuffmanNode tree, Bitstring bitstring, ArrayList<Byte> decompressedBytes) throws IOException {
+
         HuffmanNode tempTree = tree;
         int c = 0;
-        
-        for (long j = 1 << bitstring.len - 1; j != 0; j >>= 1) {
+        for (long j = 1 << bitstring.lengde - 1; j != 0; j >>= 1) {
             c++;
-            if ((bitstring.bits & j) == 0)
+            if ((bitstring.biter & j) == 0)
                 tempTree = tempTree.left;
             else
                 tempTree = tempTree.right;
 
-            if (tempTree.left == null) {
-                long cha = tempTree.c;
+            if (!tempTree.hasLeft()) {
+                long cha = tempTree.character;
                 decompressedBytes.add((byte) cha);
                 long temp = (long) ~(0);
-                bitstring.bits = (bitstring.bits & temp);
-                bitstring.len = bitstring.len - c;
+                bitstring.biter = (bitstring.biter & temp);
+                bitstring.lengde = bitstring.lengde - c;
                 c = 0;
                 tempTree = tree;
             }
@@ -224,30 +209,30 @@ public class Huffman {
     }
 
     static class Bitstring {
-        int len;
-        long bits;
+        int lengde;
+        long biter;
 
         Bitstring() {
         }
 
-        Bitstring(int lenght, long bits) {
-            this.len = lenght;
-            this.bits = bits;
+        Bitstring(int len, long bits) {
+            lengde = len;
+            biter = bits;
         }
 
-        Bitstring(int lenght, byte b) {
-            this.len = lenght;
-            this.bits = convertByte(b, lenght);
+        Bitstring(int len, byte b) {
+            this.lengde = len;
+            this.biter = convertByte(b, len);
         }
 
         static Bitstring concat(Bitstring bitstring, Bitstring other) {
             Bitstring ny = new Bitstring();
-            ny.len = bitstring.len + other.len;
+            ny.lengde = bitstring.lengde + other.lengde;
 
-            if (ny.len > 64)
-                throw new IllegalArgumentException("For lang bitstreng, går ikke! " + ny.bits + ", lengde=" + ny.len);
+            if (ny.lengde > 64)
+                throw new IllegalArgumentException("For lang bitstreng, går ikke! " + ny.biter + ", lengde=" + ny.lengde);
 
-            ny.bits = other.bits | (bitstring.bits << other.len);
+            ny.biter = other.biter | (bitstring.biter << other.lengde);
             return ny;
         }
 
@@ -262,9 +247,8 @@ public class Huffman {
         }
 
         public void remove() {
-            this.bits = (bits >> 1);
-            this.len--;
+            this.biter = (biter >> 1);
+            this.lengde--;
         }
     }
 }
-
