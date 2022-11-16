@@ -67,9 +67,7 @@ public class Exercise7 {
         public void dijkstra(int srcNode) {
             this.srcNode = srcNode;
             //Set all distances as max value
-            for (int i = 0; i < N; i++) {
-                dist[i] = Integer.MAX_VALUE;
-            }
+            Arrays.fill(dist,Integer.MAX_VALUE);
 
             //First add the source node to the priority queue
             pq.add(new Node(srcNode, 0));
@@ -120,7 +118,6 @@ public class Exercise7 {
                     pq.add(new Node(neighbourNode.node, dist[neighbourNode.node]));
                 }
             }
-
         }
 
         /**

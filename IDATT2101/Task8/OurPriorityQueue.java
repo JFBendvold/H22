@@ -2,47 +2,39 @@ package IDATT2101.Task8;
 
 import java.util.PriorityQueue;
 
+/**
+ * Class representing the priority queue
+ */
 public class OurPriorityQueue {
     int length;
     PriorityQueue<HuffmanNode> queue;
 
+    /**
+     * Constructor
+     * @param length is the length of the queue
+     */
     public OurPriorityQueue(int length) {
         this.length = length;
         this.queue = new PriorityQueue<>(new HuffmanNode());
     }
 
-    public OurPriorityQueue buildTree(int[] values) {
-        for (int i = 0; i < values.length; i++) {
-            if (values[i] == 0) continue;
+    /**
+     * Method for building the tree
+     * @param frequencies is frequency of the chars value
+     */
+    public void buildTree(int[] frequencies) {
+        for (int i = 0; i < frequencies.length; i++) {
+            if (frequencies[i] == 0) continue;
 
             char currentChar = (char) i;
-            int frequency = values[i];
+            int frequency = frequencies[i];
             HuffmanNode hn = new HuffmanNode(currentChar, frequency);
             queue.add(hn);
         }
-        return this;
     }
-
-    /*
-    int above(int i) {
-        return (i - 1) >> 1;
-    }
-
-    int left(int i) {
-        return (i << 1) + 1;
-    }
-
-    int right(int i) {
-        return (i +1) << 1;
-    }
-    */
 
     public boolean sizeIsOne() {
         return queue.size() == 1;
-    }
-
-    public boolean sizeMoreThanOne() {
-        return queue.size() > 1;
     }
 
     public HuffmanNode getLowest() {

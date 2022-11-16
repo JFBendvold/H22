@@ -6,37 +6,38 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Class for Lempel Ziv compression
+ * Class for LempelZiv77 compression
  */
 public class LZ77 {
-    private final int BUFFERSIZE = (1 << 11) - 1;
-    private final int POINTERSIZE = (1 << 4) - 1;
-    private final int MIN_POINTER_SIZE = 3;
-    private char[] data;
-
-    private DataInputStream inputStream;
-    private DataOutputStream outputStream;
+    private char[] charData;
 
     /**
      * Empty constructor
      */
     public LZ77() {}
 
+    /**
+     * Method for compressing a file with LZ77
+     * @param path Path to the file that's going to be compressed
+     * @return Bytearray of compressed bytes
+     * @throws IOException If file reading went wrong
+     */
     public byte[] compress(String path) throws IOException {
-        inputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(path)));
-        data = new char[inputStream.available()]; //Set the size of data-array as the size of the input stream
+        DataInputStream inStream = new DataInputStream(new BufferedInputStream(new FileInputStream(path)));
+        charData = new char[inStream.available()]; //Set the size of data-array as the size of the input stream
 
         ArrayList<Byte> compressedBytes = new ArrayList<>();
 
         //Before compressing
         // We use charset ISO 8859-1 since it's a single byte encoding
-        String text = new String(inputStream.readAllBytes(), StandardCharsets.ISO_8859_1); //Read all input bytes
-        data = text.toCharArray();
+        String text = new String(inStream.readAllBytes(), StandardCharsets.ISO_8859_1); //Read all input bytes
+        charData = text.toCharArray();
 
         //Stores all variables that can't be compressed
         StringBuilder incompressible = new StringBuilder();
 
-        for (int i = 0; i < data.length;) {
+        int i = 0;
+        while (i < charData.length) {
             Pointer pointer = getPointer(i);
             if (pointer != null) {  //If a pointer was found
                 if (incompressible.length() != 0) {
@@ -52,7 +53,7 @@ public class LZ77 {
                 i += pointer.getLength();
             }
             else {                  //If no pointer was found
-                incompressible.append(data[i]);
+                incompressible.append(charData[i]);
 
                 if (incompressible.length() == 127) {   //If the size becomes 127 (111 1111)
                     compressedBytes.add((byte) (incompressible.length()));  //Writes length of sequence of incompressible bytes
@@ -71,43 +72,50 @@ public class LZ77 {
             }
         }
 
-        inputStream.close();
+        inStream.close();
         return toByteArray(compressedBytes);
     }
 
+    /**
+     * Method for decompressing using LZ77
+     * @param bytes Bytes to decompress
+     * @param outPath Path to output file
+     * @throws IOException If file writing/reading went wrong
+     */
     public void decompress(byte[] bytes, String outPath) throws IOException {
-        outputStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(outPath)));
+        DataOutputStream outStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(outPath)));
 
         ArrayList<Byte> b = new ArrayList<>();
         int currentIndex = 0;
 
         int i = 0;
-        while (i < bytes.length-1) {
-            byte condition = bytes[i];
-            if (condition >= 0) { //Number of uncompressed bytes
-                System.out.println(condition);
-                for (int j = 0; j < condition; j++) {
-                    b.add(bytes[i+j+1]);
-                }
-                currentIndex += condition;
-                i += condition + 1;
-            }
-            else { //Read a pointer
-                int jump = ((condition & 127) << 4) | ((bytes[i+1] >> 4) & 15);
-                int length = (bytes[i+1] & 0x0F) + 1; //Length of pointer
+        if (i < bytes.length - 1) {
+            do {
+                byte condition = bytes[i];
+                if (condition >= 0) { //Number of uncompressed bytes
+                    System.out.println(condition);
+                    for (int j = 0; j < condition; j++) {
+                        b.add(bytes[i + j + 1]);
+                    }
+                    currentIndex += condition;
+                    i += condition + 1;
+                } else { //Read a pointer
+                    int jump = ((condition & 127) << 4) | ((bytes[i + 1] >> 4) & 15);
+                    int distance = (bytes[i + 1] & 0x0F) + 1; //Distance of pointer
 
-                for (int j = 0; j < length; j++) {
-                    b.add(b.get(currentIndex - jump + j));
+                    for (int j = 0; j < distance; j++) {
+                        b.add(b.get(currentIndex - jump + j));
+                    }
+                    currentIndex += distance;
+                    i += 2; //Pointer skips 2 bytes
                 }
-                currentIndex += length;
-                i += 2; //Pointer (2 bytes)
-            }
+            } while (i < bytes.length - 1);
         }
         for (i = 0; i < currentIndex; i++) {
-            outputStream.write(b.get(i));
+            outStream.write(b.get(i));
         }
-        outputStream.flush();
-        outputStream.close();
+        outStream.flush();
+        outStream.close();
     }
 
     /**
@@ -130,42 +138,47 @@ public class LZ77 {
      */
     private Pointer getPointer(int currIndex){
         Pointer pointer = new Pointer();
-        int maxIndex = currIndex + POINTERSIZE;
-        if (maxIndex > data.length -1) maxIndex = data.length -1;
 
+        int POINTERSIZE = 15; // 4 bits
+        int maxIndex = currIndex + POINTERSIZE;
+        if (maxIndex > charData.length -1) maxIndex = charData.length -1;
+        
+        int BUFFERSIZE = 2047; // 11 bits
         int minIndex = currIndex - BUFFERSIZE;
         if (minIndex < 0) minIndex = 0;
 
-        char[] buffer = Arrays.copyOfRange(data, minIndex, currIndex);
+        char[] searchBuffer = Arrays.copyOfRange(charData, minIndex, currIndex);
 
+        int MIN_POINTER_SIZE = 3;
         int i = currIndex + MIN_POINTER_SIZE -1;
 
         outerLoop:
         while(i <= maxIndex){
-            char[] keyWord = Arrays.copyOfRange(data, currIndex, i + 1);
+            char[] keyWord = Arrays.copyOfRange(charData, currIndex, i + 1);
             int j = 0;
-            while (keyWord.length + j <= buffer.length){
-                int k = keyWord.length - 1;
-                while (k >= 0 && keyWord[k] == buffer[j+k]){
-                    k--;
-                }
-                if (k < 0){
-                    pointer.setDist(buffer.length-j);
-                    pointer.setLength(keyWord.length);
-                    i++;
-                    continue outerLoop;
-                }
-                else {
-                    int l = k-1;
-                    while (l >= 0 && keyWord[l] != buffer[j+k]){
-                        l--;
+            if (keyWord.length + j <= searchBuffer.length) {
+                do {
+                    int k = keyWord.length - 1;
+                    while (k >= 0 && keyWord[k] == searchBuffer[j + k]) {
+                        k--;
                     }
-                    j += k - l;
-                }
+                    if (k < 0) {
+                        pointer.setDist(searchBuffer.length - j);
+                        pointer.setLength(keyWord.length);
+                        i++;
+                        continue outerLoop;
+                    } else {
+                        int l = k - 1;
+                        while (l >= 0 && keyWord[l] != searchBuffer[j + k]) {
+                            l--;
+                        }
+                        j += k - l;
+                    }
+                } while (keyWord.length + j <= searchBuffer.length);
             }
             break;
         }
-        if (pointer.getLength() > 0 && pointer.getLength() > 0){
+        if (pointer.getLength() > 0){
             return pointer;
         }
         return null;
@@ -175,7 +188,7 @@ public class LZ77 {
     /**
      * Class representing a pointer to a position in the array
      */
-    private class Pointer{
+    private static class Pointer {
         private int length; //The length of the text we want to compress
         private int dist; //The distance from the current position
 
@@ -212,7 +225,5 @@ public class LZ77 {
         public void setDist(int distance){
             this.dist = distance;
         }
-
     }
-
 }
